@@ -1,30 +1,49 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:app/main.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:rallyloop/data/mock_data.dart';
+import 'package:rallyloop/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUpAll(() {
+    GoogleFonts.config.allowRuntimeFetching = false;
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  test('mock seed covers the alpha screens', () {
+    final data = MockData();
+    expect(data.user.name, 'Maya');
+    expect(data.strokes.map((stroke) => stroke.id), ['fh', 'bh', 'serve', 'return']);
+    expect(data.strokeScores, hasLength(4));
+    expect(data.swings, isNotEmpty);
+    expect(data.recap.matchScores, isNotEmpty);
+    expect(data.messages.where((message) => message.fromCoach), isNotEmpty);
+    expect(data.posts, isNotEmpty);
+    expect(data.leaderboard.where((entry) => entry.isYou), hasLength(1));
+    expect(data.badges, isNotEmpty);
+    expect(data.challenge.goal, greaterThan(data.challenge.progress));
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('shell switches across the five tabs', (tester) async {
+    await tester.pumpWidget(const RallyLoopApp());
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Hey Maya'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+
+    await tester.tap(find.text('Train'));
+    await tester.pumpAndSettle();
+    expect(find.text('Choose a stroke'), findsOneWidget);
+    expect(find.text('Forehand'), findsOneWidget);
+
+    await tester.tap(find.text('Coach'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('averaged 74%'), findsOneWidget);
+
+    await tester.tap(find.text('Community'));
+    await tester.pumpAndSettle();
+    expect(find.text('Jordan'), findsOneWidget);
+
+    await tester.tap(find.text('Me'));
+    await tester.pumpAndSettle();
+    expect(find.text('42 question points'), findsOneWidget);
   });
 }
