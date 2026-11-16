@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:rallyloop/models/challenge.dart';
 import 'package:rallyloop/models/coach_message.dart';
 import 'package:rallyloop/models/community_post.dart';
+import 'package:rallyloop/models/pick_up_session.dart';
 import 'package:rallyloop/models/session_recap.dart';
 import 'package:rallyloop/models/stroke.dart';
 import 'package:rallyloop/models/swing.dart';
@@ -19,24 +20,54 @@ class MockData extends ChangeNotifier {
   final UserProfile user = const UserProfile(
     name: 'Maya',
     grade: 'Varsity',
-    streakDays: 6,
+    streakDays: 12,
     questionPoints: 42,
     techniqueScore: 78,
   );
 
   final List<Stroke> strokes = const [
-    Stroke(id: 'fh', name: 'Forehand', shortLabel: 'FH', phases: _phases),
-    Stroke(id: 'bh', name: 'Backhand', shortLabel: 'BH', phases: _phases),
-    Stroke(id: 'serve', name: 'Serve', shortLabel: 'Serve', phases: _phases),
-    Stroke(id: 'return', name: 'Return', shortLabel: 'Return', phases: _phases),
+    Stroke(
+      id: 'fh',
+      name: 'Forehand',
+      shortLabel: 'Forehand',
+      subtype: 'Topspin - open stance',
+      phases: _phases,
+    ),
+    Stroke(
+      id: 'bh',
+      name: 'Backhand',
+      shortLabel: 'Backhand',
+      subtype: 'Two-handed',
+      phases: _phases,
+    ),
+    Stroke(
+      id: 'serve',
+      name: 'Serve',
+      shortLabel: 'Serve',
+      subtype: 'Flat - trophy pose',
+      phases: _phases,
+    ),
+    Stroke(
+      id: 'return',
+      name: 'Return',
+      shortLabel: 'Return',
+      subtype: 'Block - compact',
+      phases: _phases,
+    ),
   ];
 
   final List<StrokeScore> strokeScores = const [
-    StrokeScore(strokeId: 'fh', shortLabel: 'FH', score: 84),
-    StrokeScore(strokeId: 'bh', shortLabel: 'BH', score: 71),
-    StrokeScore(strokeId: 'serve', shortLabel: 'Serve', score: 66),
-    StrokeScore(strokeId: 'return', shortLabel: 'Return', score: 79),
+    StrokeScore(strokeId: 'fh', shortLabel: 'Forehand', score: 82),
+    StrokeScore(strokeId: 'bh', shortLabel: 'Backhand', score: 71),
+    StrokeScore(strokeId: 'serve', shortLabel: 'Serve', score: 64),
+    StrokeScore(strokeId: 'return', shortLabel: 'Return', score: 77),
   ];
+
+  final PickUpSession pickUp = const PickUpSession(
+    strokeId: 'bh',
+    title: 'Backhand - Two-handed',
+    lastFix: 'Last fix: rotate shoulders earlier.',
+  );
 
   final List<Swing> swings = [
     Swing(
@@ -45,21 +76,22 @@ class MockData extends ChangeNotifier {
       matchPercent: 91,
       recordedAt: DateTime(2026, 11, 15, 16, 40),
       largestDeviation: 'Late contact',
-      largestDeviationDetail: 'Contact is 18° late versus the reference forehand.',
+      largestDeviationDetail: 'Late contact -> elbow collapse',
       metrics: const [
-        JointMetric(joint: 'Elbow', deltaDegrees: 12),
-        JointMetric(joint: 'Wrist', deltaDegrees: 18),
-        JointMetric(joint: 'Shoulder', deltaDegrees: 6),
-        JointMetric(joint: 'Hip', deltaDegrees: -4),
+        JointMetric(joint: 'Joint match vs reference', deltaDegrees: 78, unit: '%'),
+        JointMetric(joint: 'Elbow extension', deltaDegrees: -24),
+        JointMetric(joint: 'Hip-shoulder separation', deltaDegrees: 3),
+        JointMetric(joint: 'Knee flexion at contact', deltaDegrees: 11),
+        JointMetric(joint: 'Contact point (vs hip)', deltaDegrees: -2, unit: 'in'),
       ],
     ),
     Swing(
       id: 'sw-2',
       strokeId: 'bh',
-      matchPercent: 74,
+      matchPercent: 78,
       recordedAt: DateTime(2026, 11, 15, 16, 28),
       largestDeviation: 'Short backswing',
-      largestDeviationDetail: 'The backhand takeback stops 14° short of the reference.',
+      largestDeviationDetail: 'The backhand takeback stops short of the reference.',
       metrics: const [
         JointMetric(joint: 'Elbow', deltaDegrees: -14),
         JointMetric(joint: 'Wrist', deltaDegrees: 5),
@@ -69,10 +101,10 @@ class MockData extends ChangeNotifier {
     Swing(
       id: 'sw-3',
       strokeId: 'serve',
-      matchPercent: 66,
+      matchPercent: 72,
       recordedAt: DateTime(2026, 11, 14, 18, 5),
       largestDeviation: 'Toss too far forward',
-      largestDeviationDetail: 'Trophy pose is 21° closed and the toss lands in front of the front foot.',
+      largestDeviationDetail: 'Trophy pose is closed and the toss lands in front of the front foot.',
       metrics: const [
         JointMetric(joint: 'Shoulder', deltaDegrees: -21),
         JointMetric(joint: 'Elbow', deltaDegrees: 11),
@@ -94,98 +126,123 @@ class MockData extends ChangeNotifier {
   ];
 
   final SessionRecap recap = const SessionRecap(
-    swingCount: 8,
-    avgMatch: 74,
+    swingCount: 24,
+    avgMatch: 76,
     bestMatch: 91,
-    priorityFix: 'Late contact on the forehand — the racquet face opens through the ball.',
-    drill: 'Shadow 10 forehands and freeze at contact, then hit 20 live feeds out in front.',
-    matchScores: [62, 68, 71, 74, 70, 81, 88, 91],
+    priorityFix: 'Meet the ball further in front.',
+    drill: 'Shadow 10 forehands and freeze at contact, then hit 20 live feeds out in front of the front hip.',
+    matchScores: [62, 65, 68, 71, 70, 74, 76, 79, 81, 78, 83, 85, 84, 88, 86, 89, 87, 90, 88, 91, 89, 90, 91, 91],
   );
 
   final List<CoachMessage> messages = [
     const CoachMessage(
       id: 'c-1',
-      fromCoach: true,
-      strokeId: 'fh',
-      text: 'Your last session averaged 74%. The biggest leak is late contact on the forehand.',
+      fromCoach: false,
+      text: 'Why does my elbow keep collapsing on my forehand?',
     ),
     const CoachMessage(
       id: 'c-2',
-      fromCoach: false,
-      text: 'What should I fix first?',
+      fromCoach: true,
+      strokeId: 'fh',
+      text:
+          'It’s a timing issue. On 19 of 24 swings today you made contact behind your front hip. See Sept 18 - swings 8, 14, 17.',
     ),
     const CoachMessage(
       id: 'c-3',
+      fromCoach: false,
+      text: 'What should it feel like when it’s right?',
+    ),
+    const CoachMessage(
+      id: 'c-4',
       fromCoach: true,
       strokeId: 'fh',
-      text: 'Meet the ball out in front and keep the racquet face square through contact.',
+      text: 'Two cues, in order: 1) meet the ball in front of your front hip, 2) finish high with a firm wrist.',
     ),
   ];
 
   final List<String> suggestionChips = const [
-    'Why is my contact late?',
-    'Give me a drill',
     'Compare to last week',
+    'Show me swing 14',
+    'Give me a drill',
   ];
 
-  final List<String> communityFilters = const ['All', 'Forehand', 'Backhand', 'Serve', 'Return'];
+  final List<String> communityFilters = const ['My team', 'Following', 'All strokes'];
 
   final List<CommunityPost> posts = const [
     CommunityPost(
       id: 'p-1',
-      author: 'Jordan',
+      author: 'Jordan L.',
+      gradeLabel: 'G2 - 71',
+      strokeId: 'serve',
+      caption: 'Second serve toss still drifting.',
+      aiSummary:
+          'Teammates agree on two things: the toss drifts behind your head, and your legs are already straight before contact.',
+      feedbackCount: 7,
+      filterTag: 'My team',
+    ),
+    CommunityPost(
+      id: 'p-2',
+      author: 'Priya S.',
+      gradeLabel: 'G1 - 84',
       strokeId: 'fh',
       caption: 'Forehand still flying long. Where am I late?',
       aiSummary: 'Replies agree the contact is late and the follow-through wraps too early.',
       feedbackCount: 4,
-      filterTag: 'Forehand',
-    ),
-    CommunityPost(
-      id: 'p-2',
-      author: 'Priya',
-      strokeId: 'serve',
-      caption: 'Trophy pose feels cramped on second serves.',
-      aiSummary: 'Teammates flagged a low elbow and a toss that drifts forward.',
-      feedbackCount: 2,
-      filterTag: 'Serve',
+      filterTag: 'My team',
     ),
     CommunityPost(
       id: 'p-3',
-      author: 'Luis',
+      author: 'Luis M.',
+      gradeLabel: 'G3 - 66',
       strokeId: 'bh',
       caption: 'Two-handed backhand, looking for spacing cues.',
       aiSummary: 'Feedback says the non-dominant hand is pulling off the racquet early.',
       feedbackCount: 6,
-      filterTag: 'Backhand',
+      filterTag: 'Following',
     ),
   ];
 
   final Challenge challenge = const Challenge(
     id: 'weekly-serve',
-    title: 'Weekly serve challenge',
-    description: 'Land 20 serves at 70% match or better.',
-    progress: 12,
-    goal: 20,
+    title: 'Serve Consistency 100',
+    description: 'Land 100 serves with a toss deviation under 8 in.',
+    progress: 68,
+    goal: 100,
     unit: 'serves',
+    timeLeftLabel: '2d 04h left',
+    topPercent: 12,
   );
 
   final List<LeaderboardEntry> leaderboard = const [
-    LeaderboardEntry(name: 'Priya', points: 61, isYou: false),
-    LeaderboardEntry(name: 'Maya', points: 42, isYou: true),
-    LeaderboardEntry(name: 'Jordan', points: 37, isYou: false),
-    LeaderboardEntry(name: 'Luis', points: 29, isYou: false),
+    LeaderboardEntry(name: 'Alex P.', points: 100, isYou: false),
+    LeaderboardEntry(name: 'Sam R.', points: 94, isYou: false),
+    LeaderboardEntry(name: 'You', points: 68, isYou: true),
+    LeaderboardEntry(name: 'Jordan L.', points: 63, isYou: false),
   ];
 
   final List<MilestoneBadge> badges = const [
-    MilestoneBadge(title: 'First session', unlocked: true),
-    MilestoneBadge(title: '5-day streak', unlocked: true),
-    MilestoneBadge(title: '80% serve', unlocked: false),
+    MilestoneBadge(title: '500 SWINGS', unlocked: true),
+    MilestoneBadge(title: '10-DAY STREAK', unlocked: true),
+    MilestoneBadge(title: 'SERVE 90', unlocked: false),
   ];
+
+  /// Train wizard selection for Alpha stubs / later pages.
+  String selectedStrokeId = 'fh';
 
   int _localId = 0;
 
+  Stroke get selectedStroke => strokeById(selectedStrokeId);
+
+  List<Swing> get recentSwings => swings.take(3).toList();
+
   Stroke strokeById(String id) {
     return strokes.firstWhere((stroke) => stroke.id == id);
+  }
+
+  void selectStroke(String id) {
+    if (selectedStrokeId == id) return;
+    selectedStrokeId = id;
+    notifyListeners();
   }
 
   /// Scripted coach reply used until the OpenAI endpoint exists.
@@ -198,7 +255,7 @@ class MockData extends ChangeNotifier {
       CoachMessage(
         id: 'local-c-$_localId',
         fromCoach: true,
-        strokeId: 'fh',
+        strokeId: selectedStrokeId,
         text: _cannedReply(trimmed),
       ),
     );
@@ -213,8 +270,11 @@ class MockData extends ChangeNotifier {
     if (lower.contains('week') || lower.contains('compare')) {
       return 'Versus last week your average is up 6 points. Forehand contact is still the priority.';
     }
-    if (lower.contains('contact') || lower.contains('late')) {
-      return 'Contact is about 18° late. Pause at the hit and meet the ball in front of your front hip.';
+    if (lower.contains('14') || lower.contains('swing')) {
+      return 'Swing 14: contact was 2.4 in behind the front hip and elbow extension was -24°.';
+    }
+    if (lower.contains('contact') || lower.contains('late') || lower.contains('elbow')) {
+      return 'Contact is behind the front hip on most forehands. Meet the ball further in front and keep the elbow firm.';
     }
     return 'Start with this: ${recap.priorityFix}';
   }

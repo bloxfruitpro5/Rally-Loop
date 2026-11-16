@@ -6,6 +6,8 @@ class Challenge {
     required this.progress,
     required this.goal,
     required this.unit,
+    required this.timeLeftLabel,
+    this.topPercent,
   });
 
   final String id;
@@ -14,6 +16,12 @@ class Challenge {
   final int progress;
   final int goal;
   final String unit;
+
+  /// Countdown chip text, e.g. "2d left" or "2d 04h left".
+  final String timeLeftLabel;
+
+  /// Optional leaderboard percentile for the active challenge card.
+  final int? topPercent;
 
   double get fraction => goal == 0 ? 0 : progress / goal;
 }

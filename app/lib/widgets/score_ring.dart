@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'dart:math' as math;
+
+import 'package:material_ui/material_ui.dart';
 import 'package:rallyloop/theme/app_colors.dart';
 
 class ScoreRing extends StatelessWidget {
@@ -24,20 +25,26 @@ class ScoreRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fill = color ?? AppColors.accent;
-    final ring = CircularPercentIndicator(
-      radius: radius,
-      lineWidth: lineWidth,
-      percent: percent.clamp(0, 1).toDouble(),
-      animation: false,
-      circularStrokeCap: CircularStrokeCap.round,
-      backgroundColor: AppColors.border,
-      progressColor: fill,
-      center: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: radius * 0.42,
-          fontWeight: FontWeight.w800,
+    final size = radius * 2;
+    final ring = SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _ScoreRingPainter(
+          percent: percent.clamp(0, 1).toDouble(),
+          color: fill,
+          backgroundColor: AppColors.border,
+          strokeWidth: lineWidth,
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: radius * 0.42,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
       ),
     );
@@ -53,5 +60,52 @@ class ScoreRing extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class _ScoreRingPainter extends CustomPainter {
+  _ScoreRingPainter({
+    required this.percent,
+    required this.color,
+    required this.backgroundColor,
+    required this.strokeWidth,
+  });
+
+  final double percent;
+  final Color color;
+  final Color backgroundColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) - strokeWidth) / 2;
+    final track = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    final progress = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, track);
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -math.pi / 2,
+      2 * math.pi * percent,
+      false,
+      progress,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScoreRingPainter oldDelegate) {
+    return oldDelegate.percent != percent ||
+        oldDelegate.color != color ||
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.strokeWidth != strokeWidth;
   }
 }

@@ -10,12 +10,16 @@ class Stroke {
     required this.id,
     required this.name,
     required this.shortLabel,
+    required this.subtype,
     required this.phases,
   });
 
   final String id;
   final String name;
   final String shortLabel;
+
+  /// Subtype shown on the choose-stroke cards, e.g. "Topspin - open stance".
+  final String subtype;
   final List<StrokePhase> phases;
 }
 

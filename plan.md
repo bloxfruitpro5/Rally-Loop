@@ -4,7 +4,7 @@ Starting point: blank Flutter counter in [`app/lib/main.dart`](app/lib/main.dart
 
 ## Todos
 
-- [ ] Theme, shell nav, shared widgets, mock models/data
+- [x] Theme, shell nav, shared widgets, mock models/data
 - [ ] Build Home/Dashboard page from mockup
 - [ ] Build Train choose / record / side-by-side pages
 - [ ] Build Session Recap and Coach Chat (scripted)
@@ -55,10 +55,11 @@ flowchart LR
 Goal: navigable dark-theme demo that matches the mockups. No Firebase, camera, or Flask yet.
 
 ### 1.1 Foundation
-- Rename app to RallyLoop in [`app/pubspec.yaml`](app/pubspec.yaml); add `provider`, `google_fonts`, `fl_chart` (recap graph), `percent_indicator` (score rings).
+- Rename app to RallyLoop in [`app/pubspec.yaml`](app/pubspec.yaml); add `provider`, `google_fonts`, `fl_chart` (recap graph), `material_ui` (Flutter 3.50).
 - Theme tokens from mockups: bg `#0D1117`, card `#1F2937`, accent `#C6FF00`, danger/warning reds/yellows; dark `ThemeData` + shared widgets (`AppCard`, `NeonButton`, `PillBadge`, `ScoreRing`, `ProgressBar`).
 - Replace counter with `MainShell` + 5-tab bottom nav: Home, Train, Coach, Community, Me.
 - Seed `MockData` models: user “Maya”, technique scores, strokes, swings, session recap, coach messages, community posts, challenges/leaderboard.
+- **Done:** migrated off deprecated `package:flutter/material.dart` to `package:material_ui`; custom `ScoreRing` (no legacy percent_indicator).
 
 ### 1.2 Pages (one small step each)
 Build screens against mock data in this order so each PR/step is reviewable on web:

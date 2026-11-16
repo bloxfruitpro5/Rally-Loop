@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rallyloop/theme/app_colors.dart';
 
 class ProgressBar extends StatelessWidget {

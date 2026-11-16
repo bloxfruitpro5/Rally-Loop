@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:rallyloop/theme/app_colors.dart';
 
 class AppCard extends StatelessWidget {
@@ -16,7 +16,6 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final card = Container(
-      width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
         color: AppColors.card,

@@ -1,10 +1,24 @@
 class JointMetric {
-  const JointMetric({required this.joint, required this.deltaDegrees});
+  const JointMetric({
+    required this.joint,
+    required this.deltaDegrees,
+    this.unit = '°',
+  });
 
   final String joint;
 
-  /// Signed degrees versus the reference swing. Positive is late or open.
+  /// Signed delta versus the reference swing. Positive is late/open/high.
   final int deltaDegrees;
+
+  /// Display unit, usually degrees or inches.
+  final String unit;
+
+  String get displayValue {
+    final sign = deltaDegrees > 0 ? '+' : '';
+    return '$sign$deltaDegrees$unit';
+  }
+
+  bool get isPositive => deltaDegrees >= 0;
 }
 
 class Swing {

@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:rallyloop/data/mock_data.dart';
 import 'package:rallyloop/theme/app_colors.dart';
 import 'package:rallyloop/widgets/app_card.dart';
 import 'package:rallyloop/widgets/neon_button.dart';
+import 'package:rallyloop/widgets/pill_badge.dart';
 import 'package:rallyloop/widgets/score_ring.dart';
 
+/// Foundation stub for Me / profile.
 class MeScreen extends StatelessWidget {
   const MeScreen({super.key});
 
@@ -35,6 +37,27 @@ class MeScreen extends StatelessWidget {
                       Text('${user.questionPoints} question points'),
                     ],
                   ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Milestones', style: TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final badge in data.badges)
+                      PillBadge(
+                        label: badge.title,
+                        tone: badge.unlocked ? PillTone.accent : PillTone.neutral,
+                      ),
+                  ],
                 ),
               ],
             ),
