@@ -226,14 +226,37 @@ class MockData extends ChangeNotifier {
     MilestoneBadge(title: 'SERVE 90', unlocked: false),
   ];
 
-  /// Train wizard selection for Alpha stubs / later pages.
+  /// Train wizard selection. Steps: 0 choose, 1 record, 2 side-by-side.
   String selectedStrokeId = 'fh';
+  int trainStep = 0;
+  int phaseIndex = 0;
+  int? focusSwingIndex;
+  bool recordArmed = false;
+  double previewSpeed = 1;
+  bool previewFlipped = false;
+
+  static const previewSpeeds = [1.0, 0.5, 0.25];
 
   int _localId = 0;
 
   Stroke get selectedStroke => strokeById(selectedStrokeId);
 
   List<Swing> get recentSwings => swings.take(3).toList();
+
+  Swing get comparisonSwing {
+    final index = focusSwingIndex;
+    if (index != null && index >= 0 && index < swings.length) return swings[index];
+    return swings.firstWhere(
+      (swing) => swing.strokeId == selectedStrokeId,
+      orElse: () => swings.first,
+    );
+  }
+
+  String get previewSpeedLabel {
+    if (previewSpeed == 0.5) return '0.5x';
+    if (previewSpeed == 0.25) return '0.25x';
+    return '1x';
+  }
 
   Stroke strokeById(String id) {
     return strokes.firstWhere((stroke) => stroke.id == id);
@@ -242,6 +265,78 @@ class MockData extends ChangeNotifier {
   void selectStroke(String id) {
     if (selectedStrokeId == id) return;
     selectedStrokeId = id;
+    notifyListeners();
+  }
+
+  void beginTrain({String? strokeId}) {
+    if (strokeId != null) selectedStrokeId = strokeId;
+    trainStep = 0;
+    phaseIndex = 0;
+    focusSwingIndex = null;
+    recordArmed = false;
+    previewSpeed = 1;
+    previewFlipped = false;
+    notifyListeners();
+  }
+
+  void openRecord() {
+    trainStep = 1;
+    phaseIndex = 0;
+    recordArmed = false;
+    notifyListeners();
+  }
+
+  void toggleRecord() {
+    recordArmed = !recordArmed;
+    notifyListeners();
+  }
+
+  void cycleSpeed() {
+    final current = previewSpeeds.indexOf(previewSpeed);
+    previewSpeed = previewSpeeds[(current + 1) % previewSpeeds.length];
+    notifyListeners();
+  }
+
+  void toggleFlip() {
+    previewFlipped = !previewFlipped;
+    notifyListeners();
+  }
+
+  void openReview() {
+    trainStep = 2;
+    phaseIndex = 2;
+    final index = swings.indexWhere((swing) => swing.strokeId == selectedStrokeId);
+    focusSwingIndex = index < 0 ? 0 : index;
+    notifyListeners();
+  }
+
+  void openComparison(String swingId) {
+    final index = swings.indexWhere((swing) => swing.id == swingId);
+    if (index < 0) return;
+    focusSwingIndex = index;
+    selectedStrokeId = swings[index].strokeId;
+    trainStep = 2;
+    phaseIndex = 2;
+    notifyListeners();
+  }
+
+  void backTrainStep() {
+    if (trainStep == 0) return;
+    trainStep -= 1;
+    notifyListeners();
+  }
+
+  void selectPhase(int index) {
+    phaseIndex = index.clamp(0, selectedStroke.phases.length - 1);
+    notifyListeners();
+  }
+
+  void nextSwing() {
+    final current = focusSwingIndex ?? swings.indexWhere((swing) => swing.strokeId == selectedStrokeId);
+    final next = (current + 1) % swings.length;
+    focusSwingIndex = next;
+    selectedStrokeId = swings[next].strokeId;
+    phaseIndex = 2;
     notifyListeners();
   }
 

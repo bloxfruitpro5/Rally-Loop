@@ -9,7 +9,6 @@ import 'package:rallyloop/widgets/pill_badge.dart';
 import 'package:rallyloop/widgets/progress_bar.dart';
 import 'package:rallyloop/widgets/score_ring.dart';
 
-/// Foundation stub for Home. Full dashboard layout lands in Alpha 1.2.
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -66,6 +65,10 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           AppCard(
+            onTap: () {
+              data.beginTrain(strokeId: data.pickUp.strokeId);
+              context.read<ShellController>().select(1);
+            },
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -113,7 +116,10 @@ class HomeScreen extends StatelessWidget {
           NeonButton(
             label: 'Start a training session',
             icon: Icons.videocam,
-            onPressed: () => context.read<ShellController>().select(1),
+            onPressed: () {
+              data.beginTrain();
+              context.read<ShellController>().select(1);
+            },
           ),
           const SizedBox(height: 20),
           Text('Recent swings', style: Theme.of(context).textTheme.titleMedium),
@@ -128,6 +134,10 @@ class HomeScreen extends StatelessWidget {
                 final swing = data.recentSwings[index];
                 return AppCard(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  onTap: () {
+                    data.openComparison(swing.id);
+                    context.read<ShellController>().select(1);
+                  },
                   child: SizedBox(
                     width: 96,
                     child: Column(

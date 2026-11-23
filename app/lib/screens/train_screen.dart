@@ -1,14 +1,29 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:rallyloop/data/mock_data.dart';
+import 'package:rallyloop/screens/train_compare_screen.dart';
+import 'package:rallyloop/screens/train_record_screen.dart';
 import 'package:rallyloop/theme/app_colors.dart';
 import 'package:rallyloop/widgets/app_card.dart';
 import 'package:rallyloop/widgets/neon_button.dart';
 import 'package:rallyloop/widgets/pill_badge.dart';
 
-/// Foundation stub for Train. Full 3-step wizard lands in Alpha 1.2.
 class TrainScreen extends StatelessWidget {
   const TrainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final step = context.watch<MockData>().trainStep;
+    return switch (step) {
+      0 => const TrainChooseScreen(),
+      1 => const TrainRecordScreen(),
+      _ => const TrainCompareScreen(),
+    };
+  }
+}
+
+class TrainChooseScreen extends StatelessWidget {
+  const TrainChooseScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,11 +93,7 @@ class TrainScreen extends StatelessWidget {
           const SizedBox(height: 16),
           NeonButton(
             label: 'Record my attempt →',
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Record step lands in Alpha 1.2.')),
-              );
-            },
+            onPressed: data.openRecord,
           ),
         ],
       ),
