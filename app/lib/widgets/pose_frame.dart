@@ -12,6 +12,9 @@ class PoseFrame extends StatelessWidget {
     this.flipped = false,
     this.timer,
     this.banner,
+    this.topLeftLabel,
+    this.showPlay = false,
+    this.highlightElbow = false,
   });
 
   final Color color;
@@ -19,11 +22,18 @@ class PoseFrame extends StatelessWidget {
   final bool flipped;
   final String? timer;
   final String? banner;
+  final String? topLeftLabel;
+  final bool showPlay;
+  final bool highlightElbow;
 
   @override
   Widget build(BuildContext context) {
     Widget figure = CustomPaint(
-      painter: _SkeletonPainter(color: color, phase: phase),
+      painter: _SkeletonPainter(
+        color: color,
+        phase: phase,
+        highlightElbow: highlightElbow,
+      ),
       child: const SizedBox.expand(),
     );
     if (flipped) figure = Transform.flip(flipX: true, child: figure);
@@ -39,12 +49,40 @@ class PoseFrame extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            // Soft court gradient so the frame feels like a capture surface.
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF111827), Color(0xFF0D1117)],
+                ),
+              ),
+            ),
             figure,
-            if (timer != null)
+            if (topLeftLabel != null)
               Positioned(
                 top: 12,
                 left: 12,
+                child: Text(
+                  topLeftLabel!,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+              ),
+            if (timer != null)
+              Positioned(
+                top: 12,
+                right: 12,
                 child: PillTimer(label: timer!),
+              ),
+            if (showPlay)
+              const Center(
+                child: Icon(Icons.play_circle_fill, color: AppColors.textPrimary, size: 52),
               ),
             if (banner != null)
               Positioned(
@@ -85,9 +123,20 @@ class PillTimer extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        child: Text(
-          label,
-          style: const TextStyle(color: AppColors.danger, fontWeight: FontWeight.w800),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: const BoxDecoration(color: AppColors.danger, shape: BoxShape.circle),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(color: AppColors.danger, fontWeight: FontWeight.w800),
+            ),
+          ],
         ),
       ),
     );
@@ -95,16 +144,21 @@ class PillTimer extends StatelessWidget {
 }
 
 class _SkeletonPainter extends CustomPainter {
-  _SkeletonPainter({required this.color, required this.phase});
+  _SkeletonPainter({
+    required this.color,
+    required this.phase,
+    required this.highlightElbow,
+  });
 
   final Color color;
   final int phase;
+  final bool highlightElbow;
 
   @override
   void paint(Canvas canvas, Size size) {
     final line = Paint()
       ..color = color
-      ..strokeWidth = 3
+      ..strokeWidth = 3.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
     final joint = Paint()..color = color;
@@ -154,12 +208,22 @@ class _SkeletonPainter extends CustomPainter {
 
     canvas.drawCircle(head, math.min(size.width, size.height) * 0.055, joint);
     for (final point in [shoulderL, shoulderR, elbowR, handR, hipL, hipR, kneeL, kneeR]) {
-      canvas.drawCircle(point, 4, joint);
+      canvas.drawCircle(point, 4.5, joint);
+    }
+
+    if (highlightElbow) {
+      final alert = Paint()
+        ..color = AppColors.danger
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+      canvas.drawCircle(elbowR, 14, alert);
     }
   }
 
   @override
   bool shouldRepaint(covariant _SkeletonPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.phase != phase;
+    return oldDelegate.color != color ||
+        oldDelegate.phase != phase ||
+        oldDelegate.highlightElbow != highlightElbow;
   }
 }

@@ -76,9 +76,8 @@ class MockData extends ChangeNotifier {
       matchPercent: 91,
       recordedAt: DateTime(2026, 11, 15, 16, 40),
       largestDeviation: 'Late contact',
-      largestDeviationDetail: 'Late contact -> elbow collapse',
+      largestDeviationDetail: 'elbow collapse',
       metrics: const [
-        JointMetric(joint: 'Joint match vs reference', deltaDegrees: 78, unit: '%'),
         JointMetric(joint: 'Elbow extension', deltaDegrees: -24),
         JointMetric(joint: 'Hip-shoulder separation', deltaDegrees: 3),
         JointMetric(joint: 'Knee flexion at contact', deltaDegrees: 11),
@@ -129,8 +128,12 @@ class MockData extends ChangeNotifier {
     swingCount: 24,
     avgMatch: 76,
     bestMatch: 91,
+    durationLabel: '34 MIN',
     priorityFix: 'Meet the ball further in front.',
-    drill: 'Shadow 10 forehands and freeze at contact, then hit 20 live feeds out in front of the front hip.',
+    priorityDetail:
+        'Your contact point sits about 6 in behind the front hip. The reference meets the ball about 8 in ahead.',
+    drill: 'Shadow 10 forehands and freeze at contact with a cone in front of your front hip, then hit 20 live feeds.',
+    improvementLabel: '+15% BY SWING 24',
     matchScores: [62, 65, 68, 71, 70, 74, 76, 79, 81, 78, 83, 85, 84, 88, 86, 89, 87, 90, 88, 91, 89, 90, 91, 91],
   );
 
@@ -145,7 +148,7 @@ class MockData extends ChangeNotifier {
       fromCoach: true,
       strokeId: 'fh',
       text:
-          'It’s a timing issue. On 19 of 24 swings today you made contact behind your front hip. See Sept 18 - swings 8, 14, 17.',
+          'It’s a timing issue. On 19 of 24 swings today you made contact behind your front hip. Elbow fold hit 92° vs the 112° reference on swings 8, 14, and 17.',
     ),
     const CoachMessage(
       id: 'c-3',
@@ -156,7 +159,8 @@ class MockData extends ChangeNotifier {
       id: 'c-4',
       fromCoach: true,
       strokeId: 'fh',
-      text: 'Two cues, in order: 1) meet the ball in front of your front hip, 2) finish high with a firm wrist.',
+      text:
+          'Two cues, in order:\n1) Turn as the ball leaves the strings.\n2) Feel contact ahead of the front hip.',
     ),
   ];
 
@@ -226,7 +230,7 @@ class MockData extends ChangeNotifier {
     MilestoneBadge(title: 'SERVE 90', unlocked: false),
   ];
 
-  /// Train wizard selection. Steps: 0 choose, 1 record, 2 side-by-side.
+  /// Train wizard selection. Steps: 0 choose, 1 record, 2 side-by-side, 3 recap.
   String selectedStrokeId = 'fh';
   int trainStep = 0;
   int phaseIndex = 0;
@@ -240,6 +244,8 @@ class MockData extends ChangeNotifier {
   int _localId = 0;
 
   Stroke get selectedStroke => strokeById(selectedStrokeId);
+
+  int get totalSwings => 142;
 
   List<Swing> get recentSwings => swings.take(3).toList();
 
@@ -265,6 +271,7 @@ class MockData extends ChangeNotifier {
   void selectStroke(String id) {
     if (selectedStrokeId == id) return;
     selectedStrokeId = id;
+    phaseIndex = 0;
     notifyListeners();
   }
 
@@ -337,6 +344,11 @@ class MockData extends ChangeNotifier {
     focusSwingIndex = next;
     selectedStrokeId = swings[next].strokeId;
     phaseIndex = 2;
+    notifyListeners();
+  }
+
+  void openRecap() {
+    trainStep = 3;
     notifyListeners();
   }
 

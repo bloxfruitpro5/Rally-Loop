@@ -14,88 +14,134 @@ class TrainRecordScreen extends StatelessWidget {
     final stroke = data.selectedStroke;
     final armed = data.recordArmed;
     return Scaffold(
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: data.backTrainStep,
         ),
-        title: Text('Record · ${stroke.name}'),
+        title: const Text('Record attempt'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-        children: [
-          const Text(
-            'Step 2 of 3 · Camera stays on-device until Beta.',
-            style: TextStyle(color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 16),
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: AspectRatio(
-                aspectRatio: 3 / 4,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Step 2 of 3 · ${stroke.name}',
+                  style: const TextStyle(color: AppColors.textMuted),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
                 child: PoseFrame(
                   color: AppColors.accent,
                   phase: armed ? 2 : 0,
                   flipped: data.previewFlipped,
-                  timer: armed ? '00:12' : '00:00',
+                  timer: armed ? '0:08' : '0:00',
+                  topLeftLabel: '${stroke.name.toUpperCase()} · REFERENCE LOADED',
                   banner: armed
-                      ? '17 keypoints locked · right elbow tracked'
-                      : 'Hold still — waiting for a pose',
+                      ? 'Full body in frame — 33/33 keypoints'
+                      : 'Stand 10–15 ft back · phone at hip height · landscape',
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _RecordControl(
-                icon: armed ? Icons.stop_circle_outlined : Icons.fiber_manual_record,
-                label: armed ? 'Stop' : 'Record',
-                color: AppColors.danger,
-                onTap: data.toggleRecord,
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _SideControl(
+                    label: data.previewSpeedLabel,
+                    icon: Icons.slow_motion_video,
+                    active: data.previewSpeed != 1,
+                    onTap: data.cycleSpeed,
+                  ),
+                  _RecordButton(armed: armed, onTap: data.toggleRecord),
+                  _SideControl(
+                    label: data.previewFlipped ? 'Flipped' : 'Flip',
+                    icon: Icons.cameraswitch_outlined,
+                    active: data.previewFlipped,
+                    onTap: data.toggleFlip,
+                  ),
+                ],
               ),
-              _RecordControl(
-                icon: Icons.slow_motion_video,
-                label: data.previewSpeedLabel,
-                color: AppColors.textPrimary,
-                onTap: data.cycleSpeed,
-              ),
-              _RecordControl(
-                icon: Icons.flip,
-                label: data.previewFlipped ? 'Flipped' : 'Flip',
-                color: data.previewFlipped ? AppColors.accent : AppColors.textPrimary,
-                onTap: data.toggleFlip,
+              const SizedBox(height: 20),
+              NeonButton(
+                label: 'Review side by side',
+                onPressed: data.openReview,
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          NeonButton(
-            label: 'Review side by side',
-            onPressed: data.openReview,
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _RecordControl extends StatelessWidget {
-  const _RecordControl({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
+class _RecordButton extends StatelessWidget {
+  const _RecordButton({required this.armed, required this.onTap});
 
-  final IconData icon;
-  final String label;
-  final Color color;
+  final bool armed;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            Container(
+              width: 78,
+              height: 78,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.danger, width: 4),
+                color: armed ? AppColors.danger.withValues(alpha: 0.18) : Colors.transparent,
+              ),
+              child: Center(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 160),
+                  width: armed ? 28 : 54,
+                  height: armed ? 28 : 54,
+                  decoration: BoxDecoration(
+                    color: AppColors.danger,
+                    borderRadius: BorderRadius.circular(armed ? 6 : 99),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              armed ? 'Stop' : 'Record',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SideControl extends StatelessWidget {
+  const _SideControl({
+    required this.label,
+    required this.icon,
+    required this.active,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? AppColors.accent : AppColors.textPrimary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -103,7 +149,7 @@ class _RecordControl extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 32),
+            Icon(icon, color: color, size: 28),
             const SizedBox(height: 6),
             Text(label, style: TextStyle(color: color, fontWeight: FontWeight.w700)),
           ],

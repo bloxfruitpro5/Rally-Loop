@@ -17,29 +17,36 @@ class TrainCompareScreen extends StatelessWidget {
     final swing = data.comparisonSwing;
     final stroke = data.strokeById(swing.strokeId);
     final phases = stroke.phases;
+    final swingNumber = (data.focusSwingIndex ?? 0) + 1;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: data.backTrainStep,
         ),
-        title: Text('${stroke.name} · ${swing.matchPercent}%'),
+        title: const Text('Side-by-side'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: PillBadge(label: data.previewSpeedLabel, tone: PillTone.neutral),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
         children: [
-          const Text(
-            'Step 3 of 3 · Reference versus your swing.',
-            style: TextStyle(color: AppColors.textMuted),
+          Text(
+            'Swing $swingNumber · ${stroke.name}',
+            style: const TextStyle(color: AppColors.textMuted),
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 280,
+            height: 260,
             child: Row(
               children: [
                 Expanded(
                   child: _ComparePanel(
-                    title: 'REF',
+                    title: 'REFERENCE',
                     color: AppColors.referenceBlue,
                     phase: data.phaseIndex,
                   ),
@@ -51,24 +58,46 @@ class TrainCompareScreen extends StatelessWidget {
                     color: AppColors.accent,
                     phase: data.phaseIndex,
                     matchPercent: swing.matchPercent,
+                    highlightElbow: data.phaseIndex == 2,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Row(
             children: [
-              for (var i = 0; i < phases.length; i++)
+              for (var i = 0; i < phases.length; i++) ...[
+                if (i > 0) Expanded(child: Container(height: 2, color: AppColors.border)),
                 GestureDetector(
                   onTap: () => data.selectPhase(i),
-                  child: PillBadge(
-                    label: phases[i].label,
-                    tone: i == data.phaseIndex ? PillTone.accent : PillTone.neutral,
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: i == data.phaseIndex ? AppColors.warning : AppColors.border,
+                          border: Border.all(
+                            color: i == data.phaseIndex ? AppColors.warning : AppColors.textMuted,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        phases[i].label.split('-').first,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: i == data.phaseIndex ? AppColors.warning : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+              ],
             ],
           ),
           Slider(
@@ -81,9 +110,12 @@ class TrainCompareScreen extends StatelessWidget {
             onChanged: (value) => data.selectPhase(value.round()),
           ),
           const SizedBox(height: 4),
-          const Text('Joint metrics', style: TextStyle(fontWeight: FontWeight.w800)),
-          const SizedBox(height: 8),
-          for (final metric in swing.metrics) _MetricRow(metric: metric),
+          _MetricRow(
+            label: 'Joint match vs reference',
+            value: '${swing.matchPercent}%',
+            tone: PillTone.neutral,
+          ),
+          for (final metric in swing.metrics) _MetricRow.fromMetric(metric),
           const SizedBox(height: 16),
           DecoratedBox(
             decoration: BoxDecoration(
@@ -101,9 +133,10 @@ class TrainCompareScreen extends StatelessWidget {
                     style: TextStyle(color: AppColors.danger, fontWeight: FontWeight.w800, fontSize: 12),
                   ),
                   const SizedBox(height: 6),
-                  Text(swing.largestDeviation, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-                  const SizedBox(height: 4),
-                  Text(swing.largestDeviationDetail, style: const TextStyle(color: AppColors.textMuted)),
+                  Text(
+                    '${swing.largestDeviation} → ${swing.largestDeviationDetail}',
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                  ),
                 ],
               ),
             ),
@@ -132,6 +165,14 @@ class TrainCompareScreen extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          TextButton(
+            onPressed: data.openRecap,
+            child: const Text(
+              'Finish session → Today’s recap',
+              style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700),
+            ),
+          ),
         ],
       ),
     );
@@ -144,12 +185,14 @@ class _ComparePanel extends StatelessWidget {
     required this.color,
     required this.phase,
     this.matchPercent,
+    this.highlightElbow = false,
   });
 
   final String title;
   final Color color;
   final int phase;
   final int? matchPercent;
+  final bool highlightElbow;
 
   @override
   Widget build(BuildContext context) {
@@ -158,7 +201,7 @@ class _ComparePanel extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w800)),
+            Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w800, fontSize: 12)),
             if (matchPercent != null) ...[
               const Spacer(),
               Text('$matchPercent%', style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -167,7 +210,11 @@ class _ComparePanel extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: PoseFrame(color: color, phase: phase),
+          child: PoseFrame(
+            color: color,
+            phase: phase,
+            highlightElbow: highlightElbow,
+          ),
         ),
       ],
     );
@@ -175,25 +222,39 @@ class _ComparePanel extends StatelessWidget {
 }
 
 class _MetricRow extends StatelessWidget {
-  const _MetricRow({required this.metric});
+  const _MetricRow({
+    required this.label,
+    required this.value,
+    required this.tone,
+  });
 
-  final JointMetric metric;
+  factory _MetricRow.fromMetric(JointMetric metric) {
+    final alert = metric.deltaDegrees.abs() >= 10;
+    return _MetricRow(
+      label: metric.joint,
+      value: metric.displayValue,
+      tone: alert ? PillTone.danger : PillTone.accent,
+    );
+  }
+
+  final String label;
+  final String value;
+  final PillTone tone;
 
   @override
   Widget build(BuildContext context) {
-    final alert = metric.deltaDegrees.abs() >= 15;
+    final color = switch (tone) {
+      PillTone.danger => AppColors.danger,
+      PillTone.accent => AppColors.accent,
+      PillTone.warning => AppColors.warning,
+      PillTone.neutral => AppColors.textPrimary,
+    };
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
         children: [
-          Expanded(child: Text(metric.joint)),
-          Text(
-            metric.displayValue,
-            style: TextStyle(
-              color: alert ? AppColors.danger : AppColors.accent,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
+          Expanded(child: Text(label)),
+          Text(value, style: TextStyle(color: color, fontWeight: FontWeight.w800)),
         ],
       ),
     );

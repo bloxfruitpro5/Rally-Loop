@@ -5,9 +5,9 @@ Starting point: blank Flutter counter in [`app/lib/main.dart`](app/lib/main.dart
 ## Todos
 
 - [x] Theme, shell nav, shared widgets, mock models/data
-- [ ] Build Home/Dashboard page from mockup
-- [ ] Build Train choose / record / side-by-side pages
-- [ ] Build Session Recap and Coach Chat (scripted)
+- [x] Build Home/Dashboard page from mockup
+- [x] Build Train choose / record / side-by-side pages
+- [x] Build Session Recap and Coach Chat (scripted)
 - [ ] Build Community, Challenges, and Me stub pages
 - [ ] Firebase setup, email/password auth, user docs
 - [ ] Local Flask /analyze with MediaPipe + AnalysisApi
@@ -55,7 +55,7 @@ flowchart LR
 Goal: navigable dark-theme demo that matches the mockups. No Firebase, camera, or Flask yet.
 
 ### 1.1 Foundation
-- Rename app to RallyLoop in [`app/pubspec.yaml`](app/pubspec.yaml); add `provider`, `google_fonts`, `fl_chart` (recap graph), `material_ui` (Flutter 3.50).
+- Rename app to RallyLoop in [`app/pubspec.yaml`](app/pubspec.yaml); add `provider`, `google_fonts`, `material_ui` (Flutter 3.50). Recap chart is a custom painter.
 - Theme tokens from mockups: bg `#0D1117`, card `#1F2937`, accent `#C6FF00`, danger/warning reds/yellows; dark `ThemeData` + shared widgets (`AppCard`, `NeonButton`, `PillBadge`, `ScoreRing`, `ProgressBar`).
 - Replace counter with `MainShell` + 5-tab bottom nav: Home, Train, Coach, Community, Me.
 - Seed `MockData` models: user “Maya”, technique scores, strokes, swings, session recap, coach messages, community posts, challenges/leaderboard.
@@ -64,12 +64,12 @@ Goal: navigable dark-theme demo that matches the mockups. No Firebase, camera, o
 ### 1.2 Pages (one small step each)
 Build screens against mock data in this order so each PR/step is reviewable on web:
 
-1. **Home / Dashboard** — greeting + streak, technique score ring + FH/BH/Serve/Return, “Pick up where you left off”, weekly challenge card, “Start a training session”, recent swings row.
-2. **Train Step 1 — Choose stroke** — 2×2 stroke grid, reference clip placeholder + phase chips (Ready → Follow-through), “Record my attempt”.
-3. **Train Step 2 — Record** — camera-frame placeholder, skeleton overlay mock, timer, keypoint banner, record/speed/flip controls (non-functional).
-4. **Train Step 3 — Side-by-side** — REF vs YOU panels, phase scrubber, joint metrics list, largest-deviation card, Next swing / Ask Coach.
-5. **Session Recap** — swings/avg/best stats, Priority 1 fix card + drill, match-score line chart, Share / Ask Coach.
-6. **Coach Chat** — stroke chip, scripted bubbles grounded in mock session, suggestion chips, send appends canned replies.
+1. **Home / Dashboard** — DONE: greeting + streak, technique score ring + stroke bars, pick-up card, weekly challenge, start CTA, recent swings.
+2. **Train Step 1 — Choose stroke** — DONE: 2×2 grid with SELECTED state, PoseFrame reference + phase chips, record CTA.
+3. **Train Step 2 — Record** — DONE: capture frame, skeleton overlay, timer, keypoint banner, record/speed/flip controls.
+4. **Train Step 3 — Side-by-side** — DONE: REFERENCE vs YOU, phase scrubber, metrics, deviation card, Next swing / Ask Coach.
+5. **Session Recap** — DONE: stats, Priority 1 fix + drill, match-score chart, Share / Ask Coach; wired after compare via Finish session.
+6. **Coach Chat** — DONE: stroke chip, grounded bubbles, suggestion chips, composer with scripted replies.
 7. **Community feed** — filters, post card (video placeholder + AI summary), Give feedback.
 8. **Challenges** — active challenge + progress, team leaderboard (You highlighted), milestone badges.
 9. **Me (profile stub)** — name, grade/score, streak, question-ask points placeholder, sign-out placeholder.
